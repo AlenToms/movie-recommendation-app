@@ -114,16 +114,17 @@ if (!isset($_SESSION["email"])) {
 <script>
 AOS.init();
 
-const apiKey = 'd371a630'; // ✅ Your working OMDB API key
-
 async function fetchMovies() {
+    const apiKey = 'd371a630'; // ✅ your API key
     const selectedGenre = document.getElementById("genreSelect").value;
     const keywords = selectedGenre
         ? [selectedGenre]
         : ["action", "drama", "thriller", "romance", "war", "alien", "magic", "spy", "zombie", "superhero", "horror", "crime", "comedy"];
 
     const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-    const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${randomKeyword}`;
+    const randomPage = Math.floor(Math.random() * 10) + 1; // page 1 to 10
+
+    const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${randomKeyword}&page=${randomPage}`;
 
     try {
         const response = await fetch(url);
@@ -132,33 +133,30 @@ async function fetchMovies() {
         container.innerHTML = "";
 
         if (data.Response === "True") {
-    // Sort movies by year (descending)
-    const sortedMovies = data.Search.sort((a, b) => {
-        return parseInt(b.Year) - parseInt(a.Year);
-    });
-
-    sortedMovies.forEach(movie => {
-        const col = document.createElement("div");
-        col.className = "col-md-3 mb-4";
-        col.setAttribute("data-aos", "fade-up");
-        col.innerHTML = `
-            <div class="card movie-card h-100" onclick="openMovieModal('${movie.imdbID}')">
-                <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450"}" class="movie-poster card-img-top">
-                <div class="card-body">
-                    <h6 class="card-title">${movie.Title}</h6>
-                    <p class="card-text"><small>${movie.Year}</small></p>
-                </div>
-            </div>
-        `;
-        container.appendChild(col);
-    });
-} else {
+            const sortedMovies = data.Search.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
+            sortedMovies.forEach(movie => {
+                const col = document.createElement("div");
+                col.className = "col-md-3 mb-4";
+                col.setAttribute("data-aos", "fade-up");
+                col.innerHTML = `
+                    <div class="card movie-card h-100" onclick="openMovieModal('${movie.imdbID}')">
+                        <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450"}" class="movie-poster card-img-top">
+                        <div class="card-body">
+                            <h6 class="card-title">${movie.Title}</h6>
+                            <p class="card-text"><small>${movie.Year}</small></p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
+            });
+        } else {
             container.innerHTML = `<div class="col text-center"><p class="text-danger">No movies found. Try again!</p></div>`;
         }
     } catch (error) {
         console.error("Fetch error:", error);
     }
 }
+
 
 async function openMovieModal(imdbID) {
     const url = `https://www.omdbapi.com/?apikey=${apiKey}&i=${imdbID}&plot=full`;
