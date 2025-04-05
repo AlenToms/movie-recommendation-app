@@ -219,14 +219,15 @@ document.getElementById("registerForm").addEventListener("submit", function(e) {
   })
   .then(res => res.text())
   .then(data => {
-    if (data.includes("exists")) {
-      new bootstrap.Modal(document.getElementById("existsModal")).show();
-    } else if (data.includes("success")) {
-      new bootstrap.Modal(document.getElementById("successModal")).show();
-    } else {
-      alert("Something went wrong.");
-    }
-  });
+  console.log("RAW RESPONSE:", data); // 👈 Add this
+  if (data.includes("exists")) {
+    new bootstrap.Modal(document.getElementById("existsModal")).show();
+  } else if (data.includes("success")) {
+    new bootstrap.Modal(document.getElementById("successModal")).show();
+  } else {
+    alert("Something went wrong");
+  }
+});
 });
 </script>
 
