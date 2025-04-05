@@ -1,23 +1,30 @@
 <?php
-session_start();
 include 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST["email"];
-    $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
+  $email = $_POST["email"];
+  $password = $_POST["password"];
+  $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
-    $stmt->bind_param("ss", $email, $password);
+  $check = $conn->prepare("SELECT * FROM users WHERE email = ?");
+  $check->bind_param("s", $email);
+  $check->execute();
+  $check->store_result();
 
-    if ($stmt->execute()) {
-        $_SESSION["email"] = $email;
-        header("Location: ../frontend/landing.php");
-        exit();
+  if ($check->num_rows > 0) {
+    echo "exists";
+  } else {
+    $insert = $conn->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
+    $insert->bind_param("ss", $email, $hashed_password);
+    if ($insert->execute()) {
+      echo "success";
     } else {
-        echo "Error: " . $conn->error;
+      echo "error";
     }
+    $insert->close();
+  }
 
-    $stmt->close();
-    $conn->close();
+  $check->close();
+  $conn->close();
 }
 ?>
