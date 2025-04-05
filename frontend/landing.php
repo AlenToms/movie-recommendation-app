@@ -1,256 +1,227 @@
 <?php
 session_start();
-if (!isset($_SESSION["email"])) {
-    echo "<script>alert('You must be logged in!'); window.location.href = 'login.html';</script>";
-    exit();
+if (!isset($_SESSION['email'])) {
+  header("Location: login.html");
+  exit();
+}
+include '../server/db.php';
+
+$watchedIds = [];
+$watchlistIds = [];
+if (isset($_SESSION['email'])) {
+  $email = $_SESSION['email'];
+
+  $res1 = $conn->query("SELECT imdb_id FROM watched WHERE email='$email'");
+  while ($row = $res1->fetch_assoc()) {
+    $watchedIds[] = $row['imdb_id'];
+  }
+
+  $res2 = $conn->query("SELECT imdb_id FROM watchlist WHERE email='$email'");
+  while ($row = $res2->fetch_assoc()) {
+    $watchlistIds[] = $row['imdb_id'];
+  }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MovieLand - Home</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Bootstrap + Animate CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
+  <meta charset="UTF-8" />
+  <title>MovieLand | Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
   <style>
     body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      color: white;
     }
-
-    .navbar-brand {
-      font-weight: bold;
-      font-size: 1.5rem;
-    }
-
-    .movie-card {
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
+    .card {
+      background-color: #1c1c1e;
+      border-radius: 12px;
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
       cursor: pointer;
+      overflow: hidden;
     }
-
-    .movie-card:hover {
+    .card:hover {
       transform: scale(1.05);
+      box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
     }
-
-    .movie-poster {
-      height: 320px;
+    .card-img-top {
+      height: 350px;
       object-fit: cover;
-      width: 100%;
+      border-radius: 12px 12px 0 0;
     }
-
+    .modal-content {
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
     .dropdown-menu {
-      min-width: 180px;
-      animation-duration: 0.3s;
-    }
-
-    .dropdown-item:hover {
-      background-color: #f1f1f1;
+      max-height: 400px;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
 
-<!-- Navigation Bar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">🎬 MovieLand</a>
-
-    <div class="dropdown ms-auto">
-      <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" width="24" height="24" class="rounded-circle me-2">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+  <a class="navbar-brand fw-bold text-warning" href="#">MovieLand</a>
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link active" href="landing.php">Home</a></li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="watchlistDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Watchlist</a>
+        <ul class="dropdown-menu" aria-labelledby="watchlistDropdown" id="watchlistMenu"></ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="watchedDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Watched</a>
+        <ul class="dropdown-menu" aria-labelledby="watchedDropdown" id="watchedMenu"></ul>
+      </li>
+    </ul>
+    <div class="dropdown">
+      <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+        <i class="bi bi-person-circle"></i>
       </button>
-      <ul class="dropdown-menu dropdown-menu-end text-center animate__animated animate__fadeIn" aria-labelledby="profileDropdown">
-        <li class="dropdown-item text-muted"><small><?php echo $_SESSION["email"]; ?></small></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="#">📑 Watchlist</a></li>
-        <li><a class="dropdown-item text-danger" href="logout.php">🚪 Logout</a></li>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li class="dropdown-item disabled">Logged in as <strong><?= $_SESSION['email']; ?></strong></li>
+        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
-<!-- Movie Section -->
-<div class="container text-center mt-4">
-  <h2>🔥 Discover Trending Movies</h2>
-  <div class="input-group mb-3 mt-3 w-50 mx-auto">
-  <input type="text" id="searchInput" class="form-control" placeholder="Search movies..." aria-label="Search">
-  <span class="input-group-text bg-primary text-white"><i class="bi bi-search"></i></span>
-</div>
-  <button onclick="fetchMovies()" class="btn btn-primary mt-3">🎲 Shuffle Movies</button>
-</div>
-
-<!-- Movie Grid -->
-<div class="container mt-4">
-  <div class="row" id="movies"></div>
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Now Streaming 🎬</h4>
+    <button class="btn btn-sm btn-outline-light" onclick="fetchMovies()">🔀 Shuffle</button>
+  </div>
+  <div id="movies" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4"></div>
 </div>
 
 <!-- Movie Modal -->
-<div class="modal fade" id="movieModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="movieModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">Movie Title</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content text-dark p-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="movieTitle"></h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div class="d-flex flex-column flex-md-row">
-          <img id="modalPoster" src="" class="img-fluid me-md-4 mb-3" style="max-width: 200px;">
-          <div>
-            <p><strong>Year:</strong> <span id="modalYear"></span></p>
-            <p><strong>Genre:</strong> <span id="modalGenre"></span></p>
-            <p><strong>Plot:</strong> <span id="modalPlot"></span></p>
-            <button id="addToWatchlist" class="btn btn-outline-success mt-2">➕ Add to Watchlist</button>
-          </div>
+      <div class="modal-body d-md-flex gap-4">
+        <img id="moviePoster" class="rounded shadow" style="max-width: 250px;" />
+        <div>
+          <p><strong>Year:</strong> <span id="movieYear"></span></p>
+          <p><strong>Rating:</strong> <span id="movieRating"></span></p>
+          <p class="small"><strong>Plot:</strong> <span id="moviePlot"></span></p>
+          <div class="mt-3" id="actionButtons"></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-AOS.init();
+const watchedIds = <?= json_encode($watchedIds); ?>;
+const watchlistIds = <?= json_encode($watchlistIds); ?>;
+let currentMovie = {};
+const movieContainer = document.getElementById("movies");
 
-const apiKey = 'd371a630';
-let contentType = 'movie';
+function fetchMovies() {
+  const queries = ["action", "drama", "comedy", "thriller", "sci-fi", "adventure"];
+  const query = queries[Math.floor(Math.random() * queries.length)];
 
-async function fetchMovies() {
-  const keywords = ["action", "drama", "thriller", "romance", "war", "alien", "magic", "spy", "zombie", "superhero", "horror", "crime", "comedy"];
-  const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-  const randomPage = Math.floor(Math.random() * 10) + 1;
+  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${query}&type=movie`)
+    .then(res => res.json())
+    .then(data => {
+      movieContainer.innerHTML = "";
 
-  const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${randomKeyword}&type=${contentType}&page=${randomPage}`;
+      if (data.Search) {
+        const promises = data.Search.map(movie =>
+          fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${movie.imdbID}&plot=short`).then(r => r.json())
+        );
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    const container = document.getElementById("movies");
-    container.innerHTML = "";
+        Promise.all(promises).then(results => {
+          results.forEach(movie => {
+            if (!watchedIds.includes(movie.imdbID)) {
+              const col = document.createElement("div");
+              col.className = "col movie-card";
+              col.dataset.imdbId = movie.imdbID;
+              col.innerHTML = `
+                <div class="card animate__animated animate__fadeIn" onclick="showModal(this)" data-movie='${JSON.stringify(movie).replace(/'/g, "&apos;")}' >
+                  <img src="${movie.Poster !== "N/A" ? movie.Poster : 'https://via.placeholder.com/300x450'}" class="card-img-top" alt="${movie.Title}" />
+                </div>`;
+              movieContainer.appendChild(col);
+            }
+          });
+        });
+      }
+    });
+}
 
-    if (data.Response === "True") {
-      const sortedMovies = data.Search.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
-      sortedMovies.forEach(movie => {
-        const col = document.createElement("div");
-        col.className = "col-md-3 mb-4";
-        col.setAttribute("data-aos", "fade-up");
-        col.innerHTML = `
-          <div class="card movie-card h-100" onclick="openMovieModal('${movie.imdbID}')">
-            <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450"}" class="movie-poster card-img-top">
-            <div class="card-body">
-              <h6 class="card-title">${movie.Title}</h6>
-              <p class="card-text"><small>${movie.Year}</small></p>
-            </div>
-          </div>
-        `;
-        container.appendChild(col);
-      });
-    } else {
-      container.innerHTML = `<div class="col text-center"><p class="text-danger">No movies found. Try again!</p></div>`;
-    }
-  } catch (error) {
-    console.error("Fetch error:", error);
+function showModal(cardElement) {
+  const raw = cardElement.dataset.movie.replace(/&apos;/g, "'");
+  const movie = JSON.parse(raw);
+  currentMovie = movie;
+
+  document.getElementById("movieTitle").textContent = movie.Title;
+  document.getElementById("movieYear").textContent = movie.Year;
+  document.getElementById("movieRating").textContent = movie.imdbRating;
+  document.getElementById("moviePlot").textContent = movie.Plot;
+  document.getElementById("moviePoster").src = movie.Poster;
+
+  let html = "";
+  if (watchedIds.includes(movie.imdbID)) {
+    html += `<div class="text-success fw-bold">✅ Already Watched</div>`;
+  } else {
+    html += `<button class="btn btn-outline-success w-100 mb-2" onclick="markAsWatched('${movie.imdbID}')">👁 Mark as Watched</button>`;
   }
+
+  if (watchlistIds.includes(movie.imdbID)) {
+    html += `<div class="text-warning fw-bold">⭐ Already in Watchlist</div>`;
+  } else {
+    html += `<button class="btn btn-outline-warning w-100" onclick="addToWatchlist('${movie.imdbID}')">🔖 Add to Watchlist</button>`;
+  }
+
+  document.getElementById("actionButtons").innerHTML = html;
+  new bootstrap.Modal(document.getElementById("movieModal")).show();
 }
 
-async function openMovieModal(imdbID) {
-  const url = `https://www.omdbapi.com/?apikey=${apiKey}&i=${imdbID}&plot=full`;
-  const response = await fetch(url);
-  const movie = await response.json();
-
-  document.getElementById("modalTitle").innerText = movie.Title;
-  document.getElementById("modalYear").innerText = movie.Year;
-  document.getElementById("modalGenre").innerText = movie.Genre;
-  document.getElementById("modalPlot").innerText = movie.Plot;
-  document.getElementById("modalPoster").src = movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450";
-
-  document.getElementById("addToWatchlist").onclick = () => addToWatchlist(movie);
-
-  const myModal = new bootstrap.Modal(document.getElementById('movieModal'));
-  myModal.show();
-}
-
-function addToWatchlist(movie) {
+function markAsWatched(imdbID) {
   const formData = new FormData();
-  formData.append("imdbID", movie.imdbID);
-  formData.append("title", movie.Title);
-  formData.append("year", movie.Year);
-  formData.append("poster", movie.Poster);
+  formData.append("imdb_id", imdbID);
+  formData.append("title", currentMovie.Title);
+  formData.append("poster", currentMovie.Poster);
 
-  fetch("/movie-recommendation-app/server/add_to_watchlist.php", {
+  fetch("../server/mark-as-watched.php", {
     method: "POST",
     body: formData
   })
-  .then(res => res.text())
-  .then(data => {
-    alert(data.includes("Added") ? "🎉 Movie added to your watchlist!" : data);
+  .then(r => r.text())
+  .then(() => {
+    bootstrap.Modal.getInstance(document.getElementById("movieModal")).hide();
+    document.querySelector(`[data-imdb-id='${imdbID}']`)?.remove();
+    watchedIds.push(imdbID);
+  });
+}
+
+function addToWatchlist(imdbID) {
+  const formData = new FormData();
+  formData.append("imdb_id", imdbID);
+  formData.append("title", currentMovie.Title);
+  formData.append("poster", currentMovie.Poster);
+
+  fetch("../server/add-to-watchlist.php", {
+    method: "POST",
+    body: formData
+  })
+  .then(r => r.text())
+  .then(() => {
+    bootstrap.Modal.getInstance(document.getElementById("movieModal")).hide();
+    watchlistIds.push(imdbID);
   });
 }
 
 window.onload = fetchMovies;
-const searchInput = document.getElementById("searchInput");
-
-let searchTimeout = null;
-
-searchInput.addEventListener("input", function () {
-  clearTimeout(searchTimeout);
-  const query = searchInput.value.trim();
-
-  if (query.length === 0) {
-    fetchMovies(); // fallback to random if cleared
-    return;
-  }
-
-  searchTimeout = setTimeout(() => {
-    searchMovies(query);
-  }, 500); // debounce delay
-});
-
-async function searchMovies(query) {
-  const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(query)}&type=movie`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    const container = document.getElementById("movies");
-    container.innerHTML = "";
-
-    if (data.Response === "True") {
-      const sortedMovies = data.Search.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
-      sortedMovies.forEach(movie => {
-        const col = document.createElement("div");
-        col.className = "col-md-3 mb-4";
-        col.setAttribute("data-aos", "fade-up");
-        col.innerHTML = `
-          <div class="card movie-card h-100" onclick="openMovieModal('${movie.imdbID}')">
-            <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450"}" class="movie-poster card-img-top">
-            <div class="card-body">
-              <h6 class="card-title">${movie.Title}</h6>
-              <p class="card-text"><small>${movie.Year}</small></p>
-            </div>
-          </div>
-        `;
-        container.appendChild(col);
-      });
-    } else {
-      container.innerHTML = `<div class="col text-center"><p class="text-danger">No movies found for "${query}"</p></div>`;
-    }
-  } catch (error) {
-    console.error("Search error:", error);
-  }
-}
-
 </script>
-
 </body>
 </html>
