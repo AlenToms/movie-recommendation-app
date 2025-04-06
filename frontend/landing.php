@@ -21,7 +21,32 @@ if (isset($_SESSION['email'])) {
     $watchlistIds[] = $row['imdb_id'];
   }
 }
+$watchedGenres = [];
+$watchedTypes = [];
+
+if (isset($_SESSION['email'])) {
+  $email = $_SESSION['email'];
+  $res = $conn->query("SELECT imdb_id FROM watched WHERE email='$email'");
+
+  while ($row = $res->fetch_assoc()) {
+    $movieId = $row['imdb_id'];
+    $apiRes = file_get_contents("https://www.omdbapi.com/?apikey=d371a630&i=$movieId");
+    $movieData = json_decode($apiRes, true);
+    if ($movieData) {
+      $watchedGenres = array_merge($watchedGenres, explode(", ", $movieData['Genre']));
+      $watchedTypes[] = $movieData['Type'];
+    }
+  }
+
+  $watchedGenres = array_count_values($watchedGenres);
+  arsort($watchedGenres); // most common genre first
+
+  $watchedTypes = array_count_values($watchedTypes);
+  arsort($watchedTypes); // most common type first
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,6 +106,74 @@ if (isset($_SESSION['email'])) {
   scroll-snap-align: start;
   flex: 0 0 auto;
 }
+.card .card-body h6,
+.card .card-body small {
+  color: white !important;
+}
+.trending-movies::-webkit-scrollbar,
+.popular-movies::-webkit-scrollbar {
+  height: 8px;
+}
+.trending-movies::-webkit-scrollbar-thumb,
+.popular-movies::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+/* Movie Modal Enhancements */
+.modal-content {
+  background: #1f1f2e; /* dark but not black */
+  color: #f1f1f1;      /* light text */
+  border-radius: 12px;
+  border: 1px solid #333;
+}
+
+.modal-header .modal-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  border-bottom: 1px solid #333;
+}
+
+#moviePoster {
+  max-width: 250px;
+  border-radius: 10px;
+  border: 1px solid #555;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.08);
+}
+
+.modal-body p,
+#moviePlot,
+#movieYear,
+#movieRating,
+#movieTitle {
+  color: #f8f8f8;
+}
+
+#reviewSection h6,
+#avgRating {
+  color: #ffd700;
+  font-weight: 600;
+}
+
+#allReviews {
+  color: #ccc;
+}
+
+#userComment {
+  background-color: #2a2a3d;
+  color: #fff;
+  border: 1px solid #555;
+}
+.rating-star {
+  font-size: 1.8rem;
+  color: #ccc;
+  transition: transform 0.2s, color 0.2s;
+  cursor: pointer;
+}
+.rating-star:hover {
+  color: #ffcc00 !important;
+  transform: scale(1.3);
+}
+
 
 
   </style>
@@ -97,6 +190,8 @@ if (isset($_SESSION['email'])) {
 <li class="nav-item">
   <a class="nav-link" href="watched.php">Watched</a>
 </li>
+<li class="nav-item"><a class="nav-link" href="forme.php">For Me</a></li>
+
 
     </ul>
     <div class="dropdown">
@@ -110,11 +205,19 @@ if (isset($_SESSION['email'])) {
     </div>
   </div>
 </nav>
+<div class="mb-4">
+  <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="Search for movies or series..." oninput="liveSearch()" autocomplete="off">
+</div>
+
 
 <div class="container">
 <!-- 🔥 Trending Movies -->
 <h4 class="mt-4 mb-3">🔥 Trending Movies</h4>
 <div class="trending-movies d-flex overflow-auto gap-3 mb-5 px-1" id="trendingContainer"></div>
+
+<h4 class="mt-4 mb-3">🎯 Recommended For You</h4>
+<div class="recommended-movies d-flex overflow-auto gap-3 px-1" id="recommendedContainer"></div>
+
 
 <!-- ⭐ Popular Movies -->
 <h4 class="mt-4 mb-3">⭐ Popular Movies</h4>
@@ -135,6 +238,8 @@ if (isset($_SESSION['email'])) {
         <div>
           <p><strong>Year:</strong> <span id="movieYear"></span></p>
           <p><strong>Rating:</strong> <span id="movieRating"></span></p>
+          <p><strong>Genre:</strong> <span id="movieGenre"></span></p>
+          <p><strong>Type:</strong> <span id="movieType"></span></p>
           <p class="small"><strong>Plot:</strong> <span id="moviePlot"></span></p>
           <div class="mt-3" id="actionButtons"></div>
 
@@ -147,7 +252,7 @@ if (isset($_SESSION['email'])) {
 
             <hr class="mt-4">
             <h6>Average Rating: <span id="avgRating">Loading...</span></h6>
-            <div id="allReviews" class="small text-muted"></div>
+            <div id="allReviews" class="small text-white"></div>
           </div>
         </div>
       </div>
@@ -155,21 +260,14 @@ if (isset($_SESSION['email'])) {
   </div>
 
 </div>
-<hr>
-<div class="mt-3" id="reviewSection">
-  <h6>Your Review</h6>
-  <div id="userStars" class="mb-2">
-    <!-- Stars will be injected here -->
-  </div>
-  <textarea class="form-control mb-2" id="userComment" placeholder="Write a comment..."></textarea>
-  <button class="btn btn-sm btn-primary" onclick="submitReview()">Submit Review</button>
 
-  <hr class="mt-4">
-  <h6>Average Rating: <span id="avgRating">Loading...</span></h6>
-  <div id="allReviews" class="small text-muted"></div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const userGenres = <?= json_encode(array_keys($watchedGenres)); ?>;
+const userTypes = <?= json_encode(array_keys($watchedTypes)); ?>;
+</script>
+
 <script>
 
 function showStars() {
@@ -246,6 +344,8 @@ function showModal(cardElement) {
 
   document.getElementById("movieTitle").textContent = movie.Title;
   document.getElementById("movieYear").textContent = movie.Year;
+  document.getElementById("movieGenre").textContent = movie.Genre;
+  document.getElementById("movieType").textContent = movie.Type;
   document.getElementById("movieRating").textContent = movie.imdbRating;
   document.getElementById("moviePlot").textContent = movie.Plot;
   document.getElementById("moviePoster").src = movie.Poster;
@@ -388,10 +488,11 @@ function fetchAndShow(imdbID) {
 let userRating = 0;
 
 function loadReviews(imdbID) {
-  fetch(`/movie-recommendation-app/server/get-reviews.php?imdb_id=${imdbID}`)
+  fetch(`/movie-recommendation-app/server/reviews.php?imdb_id=${imdbID}`)
     .then(res => res.json())
     .then(data => {
-      document.getElementById("avgRating").textContent = data.avg?.toFixed(1) || "No ratings";
+      document.getElementById("avgRating").textContent =
+        (data.avg && !isNaN(data.avg)) ? parseFloat(data.avg).toFixed(1) : "No ratings";
 
       // Show all comments
       let html = "";
@@ -427,6 +528,50 @@ function showStars() {
     container.appendChild(star);
   }
 }
+function liveSearch() {
+  const query = document.getElementById("searchInput").value.trim();
+  const container = document.getElementById("trendingContainer");
+
+  if (query.length < 2) {
+    container.innerHTML = "<p class='text-light'>Type at least 2 characters to search.</p>";
+    return;
+  }
+
+  container.innerHTML = "Loading...";
+
+  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.Search) {
+        container.innerHTML = "<p class='text-light'>No results found.</p>";
+        return;
+      }
+
+      const detailPromises = data.Search.map(m =>
+        fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${m.imdbID}&plot=short`).then(r => r.json())
+      );
+
+      Promise.all(detailPromises).then(results => {
+        const filtered = results.filter(m =>
+          m.Poster !== "N/A" && m.imdbRating !== "N/A"
+        );
+
+        container.innerHTML = "";
+        if (filtered.length === 0) {
+          container.innerHTML = "<p class='text-light'>No detailed results found.</p>";
+          return;
+        }
+
+        filtered.forEach(movie => {
+          const card = createMovieCard(movie);
+          container.appendChild(card);
+        });
+      });
+    });
+}
+
+
+
 
 function highlightStars(level) {
   document.querySelectorAll("#userStars i").forEach((star, index) => {
@@ -437,33 +582,85 @@ function loadTrendingMovies() {
   const trendingContainer = document.getElementById("trendingContainer");
   trendingContainer.innerHTML = "";
 
-  // Use recent years as search terms
-  const queries = ["2025", "2024", "2023"];
+  const queries = ["the", "life", "man", "night", "dark", "dream", "lost"];
+  const selected = queries.sort(() => 0.5 - Math.random()).slice(0, 3); // pick 3 keywords
 
-  const promises = queries.map(q =>
-    fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${q}&type=movie`)
+  const fetches = selected.map(q =>
+    fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${q}&type=movie&page=1`)
       .then(res => res.json())
       .then(data => data.Search || [])
   );
 
-  Promise.all(promises).then(allResults => {
-    const flat = allResults.flat();
-    const imdbFetches = flat.map(movie =>
-      fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${movie.imdbID}`).then(r => r.json())
+  Promise.all(fetches).then(results => {
+    const merged = results.flat();
+
+    const detailPromises = merged.map(m =>
+      fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${m.imdbID}&plot=short`).then(r => r.json())
     );
 
-    Promise.all(imdbFetches).then(results => {
-      const filtered = results
-        .filter(m => m.imdbRating !== "N/A" && parseFloat(m.imdbRating) >= 6.5)
-        .sort((a, b) => parseFloat(b.imdbRating) - parseFloat(a.imdbRating));
+    Promise.all(detailPromises).then(movies => {
+      const filtered = movies
+        .filter(
+          m =>
+            m.Type === "movie" &&
+            m.Year >= 2020 &&
+            m.Poster !== "N/A" &&
+            m.imdbRating !== "N/A"
+        )
+        .sort(() => 0.5 - Math.random());
 
-      trendingContainer.innerHTML = "";
-      filtered.forEach(movie => {
+      if (filtered.length === 0) {
+        trendingContainer.innerHTML = `<div class="text-light text-center w-100"><p>No trending movies found. Try refreshing!</p></div>`;
+        return;
+      }
+
+      filtered.slice(0, 15).forEach(movie => {
         const card = createMovieCard(movie);
         trendingContainer.appendChild(card);
       });
     });
   });
+}
+
+function loadRecommendations() {
+  const container = document.getElementById("recommendedContainer");
+  container.innerHTML = "";
+
+  if (!userGenres.length) {
+    container.innerHTML = `<div class="text-light text-center w-100"><p>No personalized recommendations yet.</p></div>`;
+    return;
+  }
+
+  const genre = encodeURIComponent(userGenres[0]); // top genre
+  const type = userTypes[0] || "movie";
+
+  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${genre}&type=${type}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.Search) {
+        container.innerHTML = `<div class="text-light text-center w-100"><p>No results for your preferences.</p></div>`;
+        return;
+      }
+
+      const detailPromises = data.Search.map(m =>
+        fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${m.imdbID}`).then(r => r.json())
+      );
+
+      Promise.all(detailPromises).then(movies => {
+        const filtered = movies
+          .filter(m =>
+            m.Poster !== "N/A" &&
+            m.imdbRating !== "N/A" &&
+            parseFloat(m.imdbRating) >= 6.5
+          )
+          .sort(() => 0.5 - Math.random());
+
+        filtered.slice(0, 10).forEach(movie => {
+          const card = createMovieCard(movie);
+          container.appendChild(card);
+        });
+      });
+    });
 }
 
 
@@ -498,6 +695,7 @@ function loadPopularMovies() {
 window.onload = () => {
   loadTrendingMovies();
   loadPopularMovies();
+  loadRecommendations();
 };
 
 

@@ -1,0 +1,68 @@
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f296cc69974.jpg
+RESULT: neutral
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f296e76736b.jpg
+RESULT: fear
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2970558b8e.jpg
+RESULT: neutral
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f297142ca5c.jpg
+RESULT: neutral
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2972203e86.jpg
+RESULT: neutral
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2972f820f8.jpg
+RESULT: sad
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2974083945.jpg
+RESULT: neutral
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2974ddd560.jpg
+RESULT: neutral
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2975b4005c.jpg
+RESULT: fear
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f297f439a5f.jpg
+RESULT: unknown
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f29a1c4f0d7.jpg
+RESULT: 
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f29ad7b4fe5.jpg
+OUTPUT: 
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f29ae61d1bd.jpg
+OUTPUT: 
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f29bdd4bbf2.jpg
+OUTPUT: 
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2a406007f5.jpg
+OUTPUT: 
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2a48e2f0d5.jpg
+OUTPUT: 
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2a4c039958.jpg
+OUTPUT: 
+CMD: C:^\xampp^\htdocs^\movie-recommendation-app^\venv310^\Scripts^\python.exe ../server/analyze_emotion.py ../uploads/temp_67f2a680dac22.jpg
+OUTPUT: 
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2a9c2aee54.jpg
+OUTPUT: happy
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2a9e9dd8ad.jpg
+OUTPUT: happy
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2a9ff65961.jpg
+OUTPUT: happy
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ac74e77c1.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ac8b23003.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ac9dcfe77.jpg
+OUTPUT: happy
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2acb097b6e.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2acc0ee4b8.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2acce391c5.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2acdcc6d55.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2acf5dc95e.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ad07dbaa9.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ad1d03f33.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ad37c0f24.jpg
+OUTPUT: no_face
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ad4d1cfe1.jpg
+OUTPUT: neutral
+CMD: C:\xampp\htdocs\movie-recommendation-app\server/../venv310/Scripts/python.exe C:\xampp\htdocs\movie-recommendation-app\server/analyze_emotion.py C:\xampp\htdocs\movie-recommendation-app\server/../uploads/temp_67f2ad608aec9.jpg
+OUTPUT: surprise
