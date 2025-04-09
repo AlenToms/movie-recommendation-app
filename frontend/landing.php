@@ -30,7 +30,7 @@ if (isset($_SESSION['email'])) {
 
   while ($row = $res->fetch_assoc()) {
     $movieId = $row['imdb_id'];
-    $apiRes = file_get_contents("https://www.omdbapi.com/?apikey=d371a630&i=$movieId");
+    $apiRes = file_get_contents("https://www.omdbapi.com/?apikey=3e7ca915&i=$movieId");
     $movieData = json_decode($apiRes, true);
     if ($movieData) {
       $watchedGenres = array_merge($watchedGenres, explode(", ", $movieData['Genre']));
@@ -184,7 +184,9 @@ if (isset($_SESSION['email'])) {
   <a class="navbar-brand fw-bold text-warning" href="#">MovieLand</a>
 <div class="collapse navbar-collapse">
     <ul class="navbar-nav me-auto">
-    <li class="nav-item">
+<li class="nav-item"><a class="nav-link" href="movies.php">Movies</a></li>
+<li class="nav-item"><a class="nav-link" href="series.php">Series</a></li>
+<li class="nav-item">
   <a class="nav-link" href="watchlist.php">Watchlist</a>
 </li>
 <li class="nav-item">
@@ -212,8 +214,10 @@ if (isset($_SESSION['email'])) {
 
 <div class="container">
 <!-- 🔥 Trending Movies -->
-<h4 class="mt-4 mb-3">🔥 Trending Movies</h4>
-<div class="trending-movies d-flex overflow-auto gap-3 mb-5 px-1" id="trendingContainer"></div>
+
+<div id="trendingContainer" class="d-flex overflow-auto gap-3 px-1 pb-3"></div>
+
+
 
 <h4 class="mt-4 mb-3">🎯 Recommended For You</h4>
 <div class="recommended-movies d-flex overflow-auto gap-3 px-1" id="recommendedContainer"></div>
@@ -305,37 +309,55 @@ const watchlistIds = <?= json_encode($watchlistIds); ?>;
 let currentMovie = {};
 const movieContainer = document.getElementById("movies");
 
-function fetchMovies() {
-  const queries = ["action", "drama", "comedy", "thriller", "sci-fi", "adventure"];
-  const query = queries[Math.floor(Math.random() * queries.length)];
+function fetchTrendingMovies() {
+  const years = [2025, 2024, 2023];
+  const letters = "abcdefgijklmnopqrstuvwxyz0123456789"; // More variety
 
-  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${query}&type=movie`)
-    .then(res => res.json())
-    .then(data => {
-      movieContainer.innerHTML = "";
+  const promises = [];
 
+  years.forEach(year => {
+    letters.split('').forEach(letter => {
+      const url = `https://www.omdbapi.com/?apikey=3e7ca915&s=${letter}&y=${year}&type=movie&page=1`;
+
+      promises.push(fetch(url).then(res => res.json()));
+    });
+  });
+
+  Promise.all(promises).then(responses => {
+    const movies = [];
+
+    responses.forEach(data => {
       if (data.Search) {
-        const promises = data.Search.map(movie =>
-          fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${movie.imdbID}&plot=short`).then(r => r.json())
-        );
-
-        Promise.all(promises).then(results => {
-          results.forEach(movie => {
-            if (!watchedIds.includes(movie.imdbID)) {
-              const col = document.createElement("div");
-              col.className = "col movie-card";
-              col.dataset.imdbId = movie.imdbID;
-              col.innerHTML = `
-                <div class="card animate__animated animate__fadeIn" onclick="showModal(this)" data-movie='${JSON.stringify(movie).replace(/'/g, "&apos;")}' >
-                  <img src="${movie.Poster !== "N/A" ? movie.Poster : 'https://via.placeholder.com/300x450'}" class="card-img-top" alt="${movie.Title}" />
-                </div>`;
-              movieContainer.appendChild(col);
-            }
-          });
+        data.Search.forEach(movie => {
+          if (!movies.some(m => m.imdbID === movie.imdbID)) {
+            movies.push(movie);
+          }
         });
       }
     });
+
+    // sort by year descending (2025 first)
+    movies.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
+
+    const trendingContainer = document.getElementById("trending");
+    trendingContainer.innerHTML = "";
+
+    movies.forEach(movie => {
+      const card = document.createElement("div");
+      card.className = "card me-3";
+      card.style.width = "180px";
+      card.innerHTML = `
+        <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/180x270'}" 
+             class="card-img-top" style="height:270px; object-fit:cover;">
+        <div class="card-body text-white bg-dark p-2">
+          <h6 class="card-title small text-truncate">${movie.Title}</h6>
+          <p class="card-text"><small>${movie.Year}</small></p>
+        </div>`;
+      trendingContainer.appendChild(card);
+    });
+  });
 }
+
 
 function showModal(cardElement) {
   const raw = cardElement.dataset.movie.replace(/&apos;/g, "'");
@@ -348,7 +370,7 @@ function showModal(cardElement) {
   document.getElementById("movieType").textContent = movie.Type;
   document.getElementById("movieRating").textContent = movie.imdbRating;
   document.getElementById("moviePlot").textContent = movie.Plot;
-  document.getElementById("moviePoster").src = movie.Poster;
+  document.getElementById("moviePoster").src = `http://img.omdbapi.com/?i=${movie.imdbID}&h=600&apikey=3e7ca915`;
   loadReviews(movie.imdbID);
   let html = "";
   if (watchedIds.includes(movie.imdbID)) {
@@ -421,13 +443,13 @@ function handleSearch() {
     return;
   }
 
-  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${encodeURIComponent(query)}&type=movie`)
+  fetch(`https://www.omdbapi.com/?apikey=3e7ca915&s=${encodeURIComponent(query)}&type=movie`)
     .then(res => res.json())
     .then(data => {
       movieContainer.innerHTML = "";
       if (data.Response === "True") {
         const promises = data.Search.map(movie =>
-          fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${movie.imdbID}&plot=short`).then(r => r.json())
+          fetch(`https://www.omdbapi.com/?apikey=3e7ca915&i=${movie.imdbID}&plot=short`).then(r => r.json())
         );
 
         Promise.all(promises).then(results => {
@@ -455,7 +477,7 @@ function handleSearch() {
 
 
 function fetchAndShow(imdbID) {
-  fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${imdbID}&plot=short`)
+  fetch(`https://www.omdbapi.com/?apikey=3e7ca915&i=${imdbID}&plot=short`)
     .then(res => res.json())
     .then(movie => {
       currentMovie = movie;
@@ -463,7 +485,7 @@ function fetchAndShow(imdbID) {
       document.getElementById("movieYear").textContent = movie.Year;
       document.getElementById("movieRating").textContent = movie.imdbRating;
       document.getElementById("moviePlot").textContent = movie.Plot;
-      document.getElementById("moviePoster").src = movie.Poster;
+      document.getElementById("moviePoster").src = `http://img.omdbapi.com/?i=${movie.imdbID}&h=600&apikey=3e7ca915`;
 
       let html = "";
       if (watchedIds.includes(movie.imdbID)) {
@@ -539,7 +561,7 @@ function liveSearch() {
 
   container.innerHTML = "Loading...";
 
-  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${encodeURIComponent(query)}`)
+  fetch(`https://www.omdbapi.com/?apikey=3e7ca915&s=${encodeURIComponent(query)}`)
     .then(res => res.json())
     .then(data => {
       if (!data.Search) {
@@ -548,7 +570,7 @@ function liveSearch() {
       }
 
       const detailPromises = data.Search.map(m =>
-        fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${m.imdbID}&plot=short`).then(r => r.json())
+        fetch(`https://www.omdbapi.com/?apikey=3e7ca915&i=${m.imdbID}&plot=short`).then(r => r.json())
       );
 
       Promise.all(detailPromises).then(results => {
@@ -586,7 +608,7 @@ function loadTrendingMovies() {
   const selected = queries.sort(() => 0.5 - Math.random()).slice(0, 3); // pick 3 keywords
 
   const fetches = selected.map(q =>
-    fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${q}&type=movie&page=1`)
+    fetch(`https://www.omdbapi.com/?apikey=3e7ca915&s=${q}&type=movie&page=1`)
       .then(res => res.json())
       .then(data => data.Search || [])
   );
@@ -595,7 +617,7 @@ function loadTrendingMovies() {
     const merged = results.flat();
 
     const detailPromises = merged.map(m =>
-      fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${m.imdbID}&plot=short`).then(r => r.json())
+      fetch(`https://www.omdbapi.com/?apikey=3e7ca915&i=${m.imdbID}&plot=short`).then(r => r.json())
     );
 
     Promise.all(detailPromises).then(movies => {
@@ -634,7 +656,7 @@ function loadRecommendations() {
   const genre = encodeURIComponent(userGenres[0]); // top genre
   const type = userTypes[0] || "movie";
 
-  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${genre}&type=${type}`)
+  fetch(`https://www.omdbapi.com/?apikey=3e7ca915&s=${genre}&type=${type}`)
     .then(res => res.json())
     .then(data => {
       if (!data.Search) {
@@ -643,7 +665,7 @@ function loadRecommendations() {
       }
 
       const detailPromises = data.Search.map(m =>
-        fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${m.imdbID}`).then(r => r.json())
+        fetch(`https://www.omdbapi.com/?apikey=3e7ca915&i=${m.imdbID}`).then(r => r.json())
       );
 
       Promise.all(detailPromises).then(movies => {
@@ -670,13 +692,13 @@ function loadPopularMovies() {
   const popularContainer = document.getElementById("popularContainer");
   popularContainer.innerHTML = "";
 
-  fetch(`https://www.omdbapi.com/?apikey=d371a630&s=${query}&type=movie`)
+  fetch(`https://www.omdbapi.com/?apikey=3e7ca915&s=${query}&type=movie`)
     .then(res => res.json())
     .then(data => {
       if (!data.Search) return;
 
       const detailsPromises = data.Search.map(m =>
-        fetch(`https://www.omdbapi.com/?apikey=d371a630&i=${m.imdbID}&plot=short`).then(r => r.json())
+        fetch(`https://www.omdbapi.com/?apikey=3e7ca915&i=${m.imdbID}&plot=short`).then(r => r.json())
       );
 
       Promise.all(detailsPromises).then(results => {
@@ -693,9 +715,9 @@ function loadPopularMovies() {
     });
 }
 window.onload = () => {
-  loadTrendingMovies();
   loadPopularMovies();
   loadRecommendations();
+  fetchTrendingMovies();
 };
 
 
