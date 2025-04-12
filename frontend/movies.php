@@ -19,7 +19,8 @@ while ($r = $wl->fetch_assoc()) $watchlist[] = $r['imdb_id'];
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Movies | MoodFlix
+  <title>Movies | RecomX
+
 </title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -69,7 +70,8 @@ while ($r = $wl->fetch_assoc()) $watchlist[] = $r['imdb_id'];
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <a class="navbar-brand fw-bold text-warning" href="landing.php">MoodFlix
+  <a class="navbar-brand fw-bold text-warning" href="landing.php">RecomX
+
 </a>
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav me-auto">
@@ -78,6 +80,7 @@ while ($r = $wl->fetch_assoc()) $watchlist[] = $r['imdb_id'];
       <li class="nav-item"><a class="nav-link " href="series.php">Series</a></li>
       <li class="nav-item"><a class="nav-link" href="watchlist.php">Watchlist</a></li>
       <li class="nav-item"><a class="nav-link" href="watched.php">Watched</a></li>
+      <li class="nav-item"><a class="nav-link" href="forme.php">For Me</a></li>
     </ul>
     <div class="dropdown">
       <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">

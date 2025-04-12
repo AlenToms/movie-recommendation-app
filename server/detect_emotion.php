@@ -33,10 +33,9 @@ $scriptPath = __DIR__ . '/analyze_emotion.py';
 $cmd = "$venvPython $scriptPath $imagePath";
 exec($cmd, $output, $status);
 
-// Log for debugging
-file_put_contents(__DIR__ . '/../logs/emotion_log.txt', "CMD: $cmd\nOUTPUT: " . implode("\n", $output) . "\n", FILE_APPEND);
+// Debug logging
+@file_put_contents(__DIR__ . '/../logs/emotion_log.txt', "CMD: $cmd\nOUTPUT: " . implode("\n", $output) . "\n", FILE_APPEND);
 
-// Handle result
 $emotion = strtolower(trim($output[0] ?? ''));
 
 if (!$emotion || $emotion === 'no_face') {
@@ -45,50 +44,66 @@ if (!$emotion || $emotion === 'no_face') {
   exit();
 }
 
-// Map emotion → OMDB genres
+// Emotion-to-genre map
 $genreMap = [
-    "happy" => ["comedy", "romance", "animation"],
-    "sad" => ["drama", "biography", "musical"],
-    "angry" => ["thriller", "crime", "action"],
-    "surprise" => ["fantasy", "adventure", "sci-fi"],
-    "neutral" => ["documentary", "drama", "family"],
-    "fear" => ["horror", "mystery", "psychological"]
-  ];
+  "happy"    => ["comedy", "romance", "animation"],
+  "sad"      => ["drama", "biography", "musical"],
+  "angry"    => ["thriller", "crime", "action"],
+  "surprise" => ["fantasy", "adventure", "sci-fi"],
+  "neutral"  => ["documentary", "drama", "family"],
+  "fear"     => ["horror", "mystery", "psychological"]
+];
 
 $genres = $genreMap[$emotion] ?? ["drama"];
 $movies = [];
+$apiKey = "3e7ca915";
 
-foreach ($genres as $g) {
-  $query = urlencode($g);
-  $url = "https://www.omdbapi.com/?apikey=d371a630&s=$query&type=movie";
-  $res = file_get_contents($url);
-  $data = json_decode($res, true);
+foreach ($genres as $genre) {
+  $query = urlencode($genre);
+  
+  for ($page = 1; $page <= 4; $page++) {
+    foreach (["movie", "series"] as $type) {
+      $url = "https://www.omdbapi.com/?apikey=$apiKey&s=$query&type=$type&page=$page";
+      $res = @file_get_contents($url);
+      $data = json_decode($res, true);
 
-  if (!empty($data['Search'])) {
-    foreach ($data['Search'] as $item) {
-      // Get full details
-      $detailsUrl = "https://www.omdbapi.com/?apikey=d371a630&i={$item['imdbID']}&plot=short";
-      $details = json_decode(file_get_contents($detailsUrl), true);
-      if ($details && $details['Response'] === 'True') {
-        $movies[] = [
-          "imdbID" => $details["imdbID"],
-          "Title" => $details["Title"],
-          "Poster" => $details["Poster"],
-          "Year" => $details["Year"],
-          "Plot" => $details["Plot"],
-          "imdbRating" => $details["imdbRating"] ?? "N/A"
-        ];
+      if (!empty($data['Search'])) {
+        foreach ($data['Search'] as $item) {
+          $detailsUrl = "https://www.omdbapi.com/?apikey=$apiKey&i={$item['imdbID']}&plot=short";
+          $details = @json_decode(file_get_contents($detailsUrl), true);
+
+          if (
+            $details &&
+            $details['Response'] === 'True' &&
+            $details['Poster'] !== 'N/A' &&
+            $details['imdbRating'] !== 'N/A' &&
+            (int)$details['Year'] >= 2020 &&
+            floatval($details['imdbRating']) >= 6.0
+          ) {
+            $movies[] = [
+              "imdbID"     => $details["imdbID"],
+              "Title"      => $details["Title"],
+              "Poster"     => $details["Poster"],
+              "Year"       => $details["Year"],
+              "Plot"       => $details["Plot"],
+              "imdbRating" => $details["imdbRating"],
+              "Type"       => $details["Type"]
+            ];
+          }
+        }
       }
     }
   }
 }
 
-// Limit to 10 results
-$movies = array_slice($movies, 0, 10);
+// Shuffle and limit results
+shuffle($movies);
+$movies = array_slice($movies, 0, 20); // Return up to 20 items
 
-// Clean up
+// Clean up temp image
 unlink($imagePath);
 
+// Final output
 echo json_encode([
   "emotion" => $emotion,
   "movies" => $movies

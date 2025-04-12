@@ -38,11 +38,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
 
-    $mail->setFrom('yourgmail@gmail.com', 'MoodFlix
+    $mail->setFrom('yourgmail@gmail.com', 'RecomX
+
 ');
     $mail->addAddress($email);
     $mail->isHTML(true);
-    $mail->Subject = 'Reset Your MoodFlix
+    $mail->Subject = 'Reset Your RecomX
+
  Password';
 
     $link = "http://localhost/movie-recommendation-app/frontend/reset-password.html?token=$token";

@@ -51,7 +51,8 @@ if (isset($_SESSION['email'])) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MoodFlix
+  <title>RecomX
+
  | Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -182,7 +183,8 @@ if (isset($_SESSION['email'])) {
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <a class="navbar-brand fw-bold text-warning" href="#">MoodFlix
+  <a class="navbar-brand fw-bold text-warning" href="#">RecomX
+
 </a>
 <div class="collapse navbar-collapse">
     <ul class="navbar-nav me-auto">
