@@ -89,8 +89,8 @@ while ($row = $res->fetch_assoc()) {
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav me-auto">
       <li class="nav-item"><a class="nav-link" href="landing.php">Home</a></li>
-      <li class="nav-item"><a class="nav-link active" href="movies.php">Movies</a></li>
-      <li class="nav-item"><a class="nav-link " href="#">Series</a></li>
+      <li class="nav-item"><a class="nav-link " href="movies.php">Movies</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#">Series</a></li>
       <li class="nav-item"><a class="nav-link" href="watchlist.php">Watchlist</a></li>
       <li class="nav-item"><a class="nav-link" href="watched.php">Watched</a></li>
       <li class="nav-item"><a class="nav-link" href="forme.php">For Me</a></li>
@@ -130,6 +130,17 @@ while ($row = $res->fetch_assoc()) {
       </div>
       <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search for series..." oninput="liveSearch()" />
       <div id="searchResults" class="movie-row"></div>
+    </div>
+  </div>
+</div>
+<!-- ✅ Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light text-center">
+      <div class="modal-body">
+        <h5 class="text-success mb-3">✅ Marked as Watched</h5>
+        <button class="btn btn-warning" data-bs-dismiss="modal">OK</button>
+      </div>
     </div>
   </div>
 </div>
@@ -267,9 +278,25 @@ function addToWatchlist(imdbID, title, poster) {
   formData.append("imdb_id", imdbID);
   formData.append("title", title);
   formData.append("poster", poster);
-  fetch("../server/add-to-watchlist.php", { method: "POST", body: formData })
-    .then(r => r.text()).then(() => alert("✅ Added to Watchlist!"));
+
+  fetch("../server/add-to-watchlist.php", {
+    method: "POST",
+    body: formData
+  })
+  .then(r => r.text())
+  .then(response => {
+    if (response.includes("already")) {
+      alert("📌 Already in your Watchlist!");
+    } else if (response.includes("success")) {
+      alert("✅ Added to Watchlist!");
+      watchlist.push(imdbID); // update client state
+      updateModalButtons(imdbID); // optional: if modal is open
+    } else {
+      alert("⚠️ Failed to add. Try again.");
+    }
+  });
 }
+
 
 function markAsWatched(imdbID, title, poster) {
   const formData = new FormData();

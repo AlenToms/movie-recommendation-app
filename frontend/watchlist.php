@@ -7,88 +7,110 @@ if (!isset($_SESSION['email'])) {
 include '../server/db.php';
 
 $email = $_SESSION['email'];
-$movies = $conn->query("SELECT * FROM watchlist WHERE email='$email'");
+
+// Get all watched IDs
+$watched = [];
+$res1 = $conn->query("SELECT imdb_id FROM watched WHERE email='$email'");
+while ($row = $res1->fetch_assoc()) {
+  $watched[] = $row['imdb_id'];
+}
+
+// Get watchlist excluding watched
+$movies = [];
+$res2 = $conn->query("SELECT * FROM watchlist WHERE email='$email'");
+while ($row = $res2->fetch_assoc()) {
+  if (!in_array($row['imdb_id'], $watched)) {
+    $movies[] = $row;
+  }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Watchlist</title>
+  <title>Watchlist | RecomX</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      background: linear-gradient(135deg, #141e30, #243b55);
       color: white;
     }
     .card {
-      background-color: #2c2f33;
-      border: none;
+      background-color: #1c1c1e;
       border-radius: 12px;
+      transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+      transform: scale(1.03);
     }
     .card-img-top {
-      height: 300px;
+      height: 350px;
       object-fit: cover;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
+    }
+    .rating-star {
+      color: gold;
+      font-size: 1.2rem;
     }
   </style>
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+  <a class="navbar-brand fw-bold text-warning" href="landing.php">RecomX</a>
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav me-auto">
+      <li class="nav-item"><a class="nav-link" href="movies.php">Movies</a></li>
+      <li class="nav-item"><a class="nav-link" href="series.php">Series</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#">Watchlist</a></li>
+      <li class="nav-item"><a class="nav-link" href="watched.php">Watched</a></li>
+      <li class="nav-item"><a class="nav-link" href="forme.php">For Me</a></li>
+    </ul>
+    <div class="text-white">Logged in as <?= $_SESSION['email'] ?></div>
+  </div>
+</nav>
+
 <div class="container py-4">
-  <h2 class="mb-4 text-center text-warning">Your Watchlist</h2>
-  <div class="row" id="watchlistContainer">
-    <?php if ($movies->num_rows > 0): ?>
-      <?php while ($row = $movies->fetch_assoc()): ?>
-        <div class="col-md-3 mb-4">
-          <div class="card h-100 text-white">
-            <img src="<?= $row['poster'] ?>" class="card-img-top" alt="<?= $row['title'] ?>">
-            <div class="card-body">
-              <h5 class="card-title"><?= $row['title'] ?></h5>
+  <h3 class="mb-4 text-warning">⭐ Your Watchlist</h3>
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    <?php foreach ($movies as $movie): ?>
+      <div class="col" data-imdb-id="<?= $movie['imdb_id'] ?>">
+        <div class="card h-100">
+          <img src="<?= $movie['poster'] ?>" class="card-img-top" alt="<?= $movie['title'] ?>">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-white"><?= $movie['title'] ?></h5>
+            <div class="mb-2 text-warning">
+              <i class="bi bi-star-fill rating-star"></i>
+              <i class="bi bi-star-fill rating-star"></i>
+              <i class="bi bi-star-fill rating-star"></i>
+              <i class="bi bi-star-half rating-star"></i>
+              <i class="bi bi-star rating-star"></i>
             </div>
-            <div class="card-footer bg-transparent border-0">
-              <div class="d-grid gap-2">
-                <button class="btn btn-success" onclick="markAsWatched(
-                  '<?= $row['imdb_id'] ?>',
-                  '<?= addslashes($row['title']) ?>',
-                  '<?= $row['poster'] ?>',
-                  this
-                )">
-                  <i class="bi bi-check-circle-fill"></i> Mark as Watched
-                </button>
-              </div>
-            </div>
+            <button class="btn btn-outline-success mt-auto" onclick="markAsWatched('<?= $movie['imdb_id'] ?>', '<?= addslashes($movie['title']) ?>', '<?= $movie['poster'] ?>')">
+              👁 Mark as Watched
+            </button>
           </div>
         </div>
-      <?php endwhile; ?>
-    <?php else: ?>
-      <div class="text-center text-light mt-5">
-        <h4>No movies in your watchlist yet.</h4>
-        <p>Start adding some from the homepage!</p>
       </div>
-    <?php endif; ?>
+    <?php endforeach; ?>
   </div>
 </div>
 
-<!-- Success Modal -->
-<div class="modal fade" id="watchSuccessModal" tabindex="-1">
+<!-- ✅ Modal for success -->
+<div class="modal fade" id="successModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-white bg-success">
-      <div class="modal-header">
-        <h5 class="modal-title">Success</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        Movie marked as watched and removed from your watchlist.
+    <div class="modal-content bg-dark text-light p-4">
+      <div class="modal-body text-center">
+        <h5>✅ Added to Watched!</h5>
+        <button class="btn btn-warning mt-3" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function markAsWatched(imdbID, title, poster, btn) {
+function markAsWatched(imdbID, title, poster) {
   const formData = new FormData();
   formData.append("imdb_id", imdbID);
   formData.append("title", title);
@@ -98,28 +120,18 @@ function markAsWatched(imdbID, title, poster, btn) {
     method: "POST",
     body: formData
   })
-  .then(r => r.text())
+  .then(res => res.text())
   .then(res => {
-    const clean = res.trim();
-    console.log("WATCHLIST AJAX RESPONSE:", clean);
-    if (clean === "success" || clean.includes("Already watched")) {
-      const card = btn.closest(".col-md-3");
-      if (card) card.remove();
-      new bootstrap.Modal(document.getElementById("watchSuccessModal")).show();
-
-      const remaining = document.querySelectorAll("#watchlistContainer .col-md-3").length;
-      if (remaining === 0) {
-        document.getElementById("watchlistContainer").innerHTML = `
-          <div class='text-center text-light mt-5'>
-            <h4>No movies in your watchlist yet.</h4>
-            <p>Start adding some from the homepage!</p>
-          </div>`;
-      }
+    if (res.trim() === "success" || res.includes("Already watched")) {
+      const card = document.querySelector(`[data-imdb-id="${imdbID}"]`);
+      if (card) card.remove(); // ✅ remove it from DOM
+      new bootstrap.Modal(document.getElementById("successModal")).show();
     } else {
-      alert("Something went wrong: " + clean);
+      alert("❌ Something went wrong: " + res);
     }
   });
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

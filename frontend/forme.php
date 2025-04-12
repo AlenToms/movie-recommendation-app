@@ -20,7 +20,7 @@ while ($row = $res->fetch_assoc()) $watchlist[] = $row['imdb_id'];
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>For Me | MovieLand</title>
+  <title>For Me | RecomX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
@@ -165,7 +165,7 @@ while ($row = $res->fetch_assoc()) $watchlist[] = $row['imdb_id'];
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <a class="navbar-brand fw-bold text-warning" href="landing.php">MovieLand</a>
+  <a class="navbar-brand fw-bold text-warning" href="landing.php">RecomX</a>
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav me-auto">
       <li class="nav-item"><a class="nav-link" href="movies.php">Movies</a></li>
@@ -173,8 +173,15 @@ while ($row = $res->fetch_assoc()) $watchlist[] = $row['imdb_id'];
       <li class="nav-item"><a class="nav-link" href="watchlist.php">Watchlist</a></li>
       <li class="nav-item"><a class="nav-link" href="watched.php">Watched</a></li>
     </ul>
-    <span class="navbar-text text-light me-2"><?= $_SESSION['email']; ?></span>
-    <a class="btn btn-outline-light" href="logout.php">Logout</a>
+    <div class="dropdown">
+      <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+        <i class="bi bi-person-circle"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li class="dropdown-item disabled">Logged in as <strong><?= $_SESSION['email']; ?></strong></li>
+        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+      </ul>
+    </div>
   </div>
 </nav>
 

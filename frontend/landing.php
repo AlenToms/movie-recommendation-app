@@ -420,20 +420,27 @@ function markAsWatched(imdbID) {
 });
 }
 
-function addToWatchlist(imdbID) {
+function addToWatchlist(imdbID, title, poster) {
   const formData = new FormData();
   formData.append("imdb_id", imdbID);
-  formData.append("title", currentMovie.Title);
-  formData.append("poster", currentMovie.Poster);
+  formData.append("title", title);
+  formData.append("poster", poster);
 
   fetch("../server/add-to-watchlist.php", {
     method: "POST",
     body: formData
   })
   .then(r => r.text())
-  .then(() => {
-    bootstrap.Modal.getInstance(document.getElementById("movieModal")).hide();
-    watchlistIds.push(imdbID);
+  .then(response => {
+    if (response.includes("already")) {
+      alert("📌 Already in your Watchlist!");
+    } else if (response.includes("success")) {
+      alert("✅ Added to Watchlist!");
+      watchlist.push(imdbID); // update client state
+      updateModalButtons(imdbID); // optional: if modal is open
+    } else {
+      alert("⚠️ Failed to add. Try again.");
+    }
   });
 }
 // Replacing live search dropdown with movie card rendering on the page

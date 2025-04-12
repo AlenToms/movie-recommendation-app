@@ -226,14 +226,28 @@ function markAsWatched(id, title, poster) {
     .then(res => alert("✅ Marked as watched!"));
 }
 
-function addToWatchlist(id, title, poster) {
+function addToWatchlist(imdbID, title, poster) {
   const formData = new FormData();
-  formData.append("imdb_id", id);
+  formData.append("imdb_id", imdbID);
   formData.append("title", title);
   formData.append("poster", poster);
-  fetch("../server/add-to-watchlist.php", { method: "POST", body: formData })
-    .then(r => r.text())
-    .then(res => alert("⭐ Added to Watchlist!"));
+
+  fetch("../server/add-to-watchlist.php", {
+    method: "POST",
+    body: formData
+  })
+  .then(r => r.text())
+  .then(response => {
+    if (response.includes("already")) {
+      alert("📌 Already in your Watchlist!");
+    } else if (response.includes("success")) {
+      alert("✅ Added to Watchlist!");
+      watchlist.push(imdbID); // update client state
+      updateModalButtons(imdbID); // optional: if modal is open
+    } else {
+      alert("⚠️ Failed to add. Try again.");
+    }
+  });
 }
 
 function liveSearch(q) {
