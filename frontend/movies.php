@@ -19,7 +19,8 @@ while ($r = $wl->fetch_assoc()) $watchlist[] = $r['imdb_id'];
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Movies | MovieLand</title>
+  <title>Movies | MoodFlix
+</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -68,7 +69,8 @@ while ($r = $wl->fetch_assoc()) $watchlist[] = $r['imdb_id'];
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <a class="navbar-brand fw-bold text-warning" href="landing.php">MovieLand</a>
+  <a class="navbar-brand fw-bold text-warning" href="landing.php">MoodFlix
+</a>
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav me-auto">
       <li class="nav-item"><a class="nav-link" href="landing.php">Home</a></li>

@@ -23,7 +23,8 @@ while ($row = $res->fetch_assoc()) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Series | MovieLand</title>
+  <title>Series | MoodFlix
+</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
   <style>
@@ -81,7 +82,8 @@ while ($row = $res->fetch_assoc()) {
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <a class="navbar-brand fw-bold text-warning" href="landing.php">MovieLand</a>
+  <a class="navbar-brand fw-bold text-warning" href="landing.php">MoodFlix
+</a>
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav me-auto">
       <li class="nav-item"><a class="nav-link" href="landing.php">Home</a></li>

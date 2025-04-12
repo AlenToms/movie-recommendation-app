@@ -49,14 +49,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mail->SMTPSecure = 'tls';
     $mail->Port       = 587;
 
-    $mail->setFrom('yourgmail@gmail.com', 'MovieLand');
+    $mail->setFrom('yourgmail@gmail.com', 'MoodFlix
+');
     $mail->addAddress($email);
 
     $mail->isHTML(true);
-    $mail->Subject = 'Activate Your MovieLand Account';
+    $mail->Subject = 'Activate Your MoodFlix
+ Account';
     $activation_link = "http://localhost/movie-recommendation-app/server/activate.php?code=$activation_code";
     $mail->Body = "
-      <h3>Welcome to MovieLand 🎬</h3>
+      <h3>Welcome to MoodFlix
+ 🎬</h3>
       <p>Click below to activate your account:</p>
       <a href='$activation_link' style='padding:10px 20px;background:#007bff;color:#fff;'>Activate Now</a>
     ";
