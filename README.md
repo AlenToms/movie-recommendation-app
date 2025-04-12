@@ -21,6 +21,17 @@ RecomX is a modern movie and series recommendation web app built with PHP, MySQL
    git clone https://github.com/AlenToms/movie-recommendation-app.git
    
 **Place the project in your web server directory**
+
 C:/xampp/htdocs/movie-recommendation-app/
 
 **Set up MySQL database**
+
+Create a new MySQL database 'movie_app'
+Import the SQL file located at movie_app.sql
+
+**Start Apache & MySQL (via XAMPP control panel)**
+
+**Visit the app in your browser**
+
+```bash
+http://localhost/movie-recommendation-app/frontend/index.html
