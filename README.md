@@ -27,6 +27,7 @@ C:/xampp/htdocs/movie-recommendation-app/
 **Set up MySQL database**
 
 Create a new MySQL database 'movie_app'
+
 Import the SQL file located at movie_app.sql
 
 **Start Apache & MySQL (via XAMPP control panel)**
