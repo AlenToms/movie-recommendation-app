@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['email'])) {
-  header("Location: login.html");
+  header("Location: index.html");
   exit();
 }
 include '../server/db.php';
@@ -79,6 +79,7 @@ while ($row = $res->fetch_assoc()) {
     .rating-star:hover, .rating-star.text-warning {
       color: #ffc107 !important;
     }
+    
   </style>
 </head>
 <body>
@@ -177,6 +178,54 @@ while ($row = $res->fetch_assoc()) {
     </div>
   </div>
 </div>
+<!-- Floating Chat Button -->
+<style>
+  #chatFloatingBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1050;
+  }
+  #chatFloatingBtn .btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  #chatFloatingBtn .bi {
+    font-size: 1.75rem;
+  }
+</style>
+
+<div id="chatFloatingBtn">
+  <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#chatModal">
+    <i class="bi bi-chat-dots-fill text-dark"></i>
+  </button>
+</div>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <iframe src="chat.php"
+                style="border:0; width:100%; height:400px;"
+                sandbox="allow-scripts allow-same-origin allow-forms">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Optional: reload the iframe whenever the modal closes
+  const chatModal = document.getElementById('chatModal');
+  chatModal.addEventListener('hidden.bs.modal', () => {
+    const iframe = chatModal.querySelector('iframe');
+    if (iframe) iframe.contentWindow.location.reload();
+  });
+</script>
 
 <script>
 const API_KEY = "3e7ca915";

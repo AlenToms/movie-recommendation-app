@@ -13,7 +13,7 @@ if (isset($_GET["code"])) {
     $update = $conn->prepare("UPDATE users SET is_active = 1, activation_code = NULL WHERE activation_code = ?");
     $update->bind_param("s", $code);
     if ($update->execute()) {
-      echo "<h2 style='font-family:sans-serif;color:green;text-align:center;'>✅ Account activated! You can now <a href='../frontend/login.html'>login</a>.</h2>";
+      echo "<h2 style='font-family:sans-serif;color:green;text-align:center;'>✅ Account activated! You can now <a href='../frontend/index.html'>login</a>.</h2>";
     } else {
       echo "<h2 style='color:red;'>Activation failed. Try again later.</h2>";
     }
